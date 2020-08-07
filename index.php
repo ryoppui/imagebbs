@@ -62,7 +62,7 @@
                             <tr>
                                 <th class="table_title">削除キー</th>
                                 <td colspan="3" class="table_data table_data-flexEnd">
-                                    <input type="password" name="pwd" size="8" class="input">
+                                    <input type="password" name="pwd" size="8" maxlength="8" class="input">
                                     <div class="textBox">
                                         <p class="textBox_text textBox_text-sizeS">(記事の削除用。英数字で8文字以内)</p>
                                     </div>
@@ -71,13 +71,56 @@
                         </tbody>
                     </table>
                     <ul class="list list-left">
-                        <li class="list_item list_item-style">添付可能ファイル：GIF,JPG,PNG</li>
-                        <li class="list_item list_item-style">ブラウザによっては正常に添付できないことがあります。</li>
-                        <li class="list_item list_item-style">最大投稿データ量は 100 KB までです。</li>
-                        <li class="list_item list_item-style">画像は横 250ピクセル、縦 250ピクセルを超えると縮小表示されます。</li>
+                        <li class="list_item list_item-style">
+                            <div class="textBox textBox-list">
+                                <p class="textBox_text textBox_text-sizeS">添付可能ファイル：GIF,JPG,PNG</p>
+                            </div>
+                        </li>
+                        <li class="list_item list_item-style">
+                            <div class="textBox textBox-list">
+                                <p class="textBox_text textBox_text-sizeS">ブラウザによっては正常に添付できないことがあります。</p>
+                            </div>
+                        </li>
+                        <li class="list_item list_item-style">
+                            <div class="textBox textBox-list">
+                                <p class="textBox_text textBox_text-sizeS">最大投稿データ量は 100 KB までです。</p>
+                            </div>
+                        </li>
+                        <li class="list_item list_item-style">
+                            <div class="textBox textBox-list">
+                                <p class="textBox_text textBox_text-sizeS">画像は横 250ピクセル、縦 250ピクセルを超えると縮小表示されます。</p>
+                            </div>
+                        </li>
                     </ul>
                 </form>
             </div>
+            <div class="block block-right block-border">
+                <div class="block block-spaceS">
+                    <form action="post" class="form form-delete">
+                        <table class="table table-delete">
+                            <thead>
+                                <tr>
+                                    <th colspan="5" class="table_title table_title-delete">【記事削除】</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th class="table_title table_title-delete">記事No</th>
+                                    <td class="table_data"><input type="text" name="no" size="3" class="input input-delete"></td>
+                                    <th class="table_title table_title-delete">削除キー</th>
+                                    <td class="table_data"><input type="password" name="pwd" size="8" maxlength="8" class="input input-delete"></td>
+                                    <td class="table_data"><input type="submint" value="削除" class="btn btn-delete"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <footer>
+                <div class="textBox textBox-inlineBlock">
+                    <p class="textBox_text">-<a href="http://php.s3.to">GazouBBS </a>-</p>
+                </div>
+            </footer>
         </div>
     </div>
 </body>

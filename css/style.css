@@ -10,13 +10,22 @@
     width: 100%;
 }
 
+.block-spaceS {
+    margin-top: 10px;
+}
+
 .block-right {
     text-align: right;
 }
 
 .block-content {
     width: 540px;
-    margin: 0 auto;
+    margin: 10px auto;
+}
+
+.block-border {
+    border-top: 1px solid gray;
+
 }
 
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
@@ -27,6 +36,10 @@
 
 .title {
     border-bottom: 1px solid gray;
+}
+
+.title-borderNone {
+    border-bottom: none;
 }
 
 .title_text {
@@ -40,6 +53,11 @@
 「「「「「「「「「「「「「「「「「「「「「「「「「「 */
 .textBox {
     width: 100%;
+}
+
+.textBox-inlineBlock {
+    display: inline-block;
+    width: auto;
 }
 
 .textBox_text {
@@ -85,6 +103,10 @@
     width: 100%;
 }
 
+.table-delete {
+    width: auto;
+}
+
 .table_title {
     width: 56px;
     -moz-text-align-last: justify;
@@ -92,6 +114,13 @@
     text-justify: inter-ideograph;
     background-color: #eeaa88;
     color: #800000;
+}
+
+.table_title-delete {
+    width: auto;
+    text-align-last: center;
+    background-color: unset;
+    font-weight: normal;
 }
 
 .table_data {
@@ -107,19 +136,33 @@
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  input textarea「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「  */
+
+.form-delete {
+    display: inline-block;
+}
+
+/* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「  input textarea「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「 */
 
 .input {
     background-color: #fff;
-    border:1px solid #000;
+    border: 1px solid #000;
     border-radius: 2px;
     display: block;
     padding: 2px;
 }
 
+.input-delete {
+    width: 60px;
+}
+
 .textarea {
     background-color: #fff;
-    border:1px solid #000;
+    border: 1px solid #000;
     border-radius: 2px;
     display: block;
     width: 100%;
@@ -140,6 +183,10 @@
     text-align: center;
     cursor: pointer;
     border-radius: 2px;
+}
+
+.btn-delete {
+    width: 40px;
 }
 
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
