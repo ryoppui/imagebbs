@@ -68,6 +68,11 @@
     font-size: 1.1rem;
 }
 
+.textBox-list {
+    display: inline-block;
+    width: auto;
+}
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  list 「「「「「「「「「「「

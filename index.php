@@ -1,5 +1,36 @@
+<?php
+
+//定数
+const LOGFILE = 'imglog2.log';
+const PATH = './img/';
+const MAX_KB = '100';
+const MAX_W = '250';
+const MAX_H = '250';
+
+const PAGE_DEF = '7';
+const LOG_MAX = '200';
+
+const ADMIN_PASS ='0123';
+const CHECK = 1;
+const SOON_ICON = 'soon.jpg';
+
+const BUNRI = 0;
+// const PHP_SELF = $PHP_SELF;
+
+if(isset($_POST)) {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $sub = $_POST['sub'];
+    $com = $_POST['com'];
+    $url = $_POST['url'];
+
+}
+
+
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="utf-8">
@@ -30,7 +61,7 @@
                 <h1 class="title_text">画像BBS</h1>
             </div>
             <div class="block block-content">
-                <form action="post" enctype="multipart/form-data" class="form">
+                <form method="post" enctype="multipart/form-data" action="#" class="form" novalidate="novalidate">
                     <table class="table">
                         <tbody>
                             <tr>
@@ -44,7 +75,7 @@
                             <tr>
                                 <th class="table_title">題名</th>
                                 <td class="table_data"><input type="text" name="sub" size="35" class="input"></td>
-                                <td class="table_data"><input type="submint" value="送信する" class="btn"></td>
+                                <td class="table_data"><input type="submit" value="送信する" class="btn"></td>
                                 <td class="table_data"><input type="reset" value="リセット" class="btn"></td>
                             </tr>
                             <tr>
@@ -96,7 +127,7 @@
             </div>
             <div class="block block-right block-border">
                 <div class="block block-spaceS">
-                    <form action="post" class="form form-delete">
+                    <form method="post" class="form form-delete" novalidate="novalidate">
                         <table class="table table-delete">
                             <thead>
                                 <tr>
