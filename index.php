@@ -15,17 +15,57 @@ const CHECK = 1;
 const SOON_ICON = 'soon.jpg';
 
 const BUNRI = 0;
-// const PHP_SELF = $PHP_SELF;
 
-if(isset($_POST)) {
+//変数
+//POST内容
+$name = '';
+$email = '';
+$sub = '';
+$com = '';
+$url = '';
+$upfile = '';
+$pwd = '';
+//エラーメッセージ
+$err = [];
+
+//POST送信があった場合
+if(!empty($_POST)) {
+    //POSTの中身をそれぞれ変数に
     $name = $_POST['name'];
     $email = $_POST['email'];
     $sub = $_POST['sub'];
     $com = $_POST['com'];
     $url = $_POST['url'];
+    $upfile = $_FILES['upfile'];
+    $pwd = $_POST['pwd'];
 
+    //バリデーションチェック
+    if($name === '' || ctype_space($name)) {
+        $err['name'] = '名前が書きこまれていません';
+    }
+
+    // if($sub === '' || ctype_space($sub)) {
+    //     $sub = '(無題)';
+    // }
+
+    if($com === '' || ctype_space($com)) {
+        $err['com'] = '本文が書き込まれていません';
+    }
+
+    if(mb_strlen($com) > 1000) {
+        $err['com'] = '本文が長すぎますっ！';
+    }
+
+    if($upfile['size'] !== 0) {
+
+        if(exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_PNG && exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_JPEG &&
+        exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_GIF) {
+            $err['upfile'] = '画像はGIF,JPG,PNGのいずれかにしてください';
+        } else if($upfile['size'] > 100000 ) {
+            $err['upfile'] = '画像サイズが100KBを超えています';
+        }
+    }
 }
-
 
 ?>
 
@@ -62,33 +102,43 @@ if(isset($_POST)) {
             </div>
             <div class="block block-content">
                 <form method="post" enctype="multipart/form-data" action="#" class="form" novalidate="novalidate">
+                    <!-- <input type="hidden" name="MAX_FILE_SIZE" value="100000"> -->
                     <table class="table">
                         <tbody>
                             <tr>
                                 <th class="table_title">おなまえ</th>
-                                <td class="table_data" colspan="3"><input type="text" name="name" size="28" class="input"></td>
+                                <td class="table_data" colspan="3">
+                                    <input type="text" name="name" size="28" value="<?php if(!empty($err)) echo $name; ?>" class="input <?php if(!empty($err_name)) echo 'active'; ?>">
+                                    <span class="errText"><?php if(!empty($err['name'])) { echo $err['name'];} ?></span>
+                                </td>
                             </tr>
                             <tr>
                                 <th class="table_title">Eメール</th>
-                                <td class="table_data" colspan="3"><input type="email" name="email" size="28" class="input"></td>
+                                <td class="table_data" colspan="3"><input type="email" name="email" size="28" value="<?php if(!empty($err)) echo $email; ?>" class="input"></td>
                             </tr>
                             <tr>
                                 <th class="table_title">題名</th>
-                                <td class="table_data"><input type="text" name="sub" size="35" class="input"></td>
+                                <td class="table_data"><input type="text" name="sub" size="35" value="<?php if(!empty($err)) echo $sub; ?>" class="input"></td>
                                 <td class="table_data"><input type="submit" value="送信する" class="btn"></td>
                                 <td class="table_data"><input type="reset" value="リセット" class="btn"></td>
                             </tr>
                             <tr>
                                 <th class="table_title">コメント</th>
-                                <td colspan="3" class="table_data"><textarea name="com" cols="50" rows="4" wrap="soft" class="textarea"></textarea></td>
+                                <td colspan="3" class="table_data">
+                                    <textarea name="com" cols="50" rows="4" wrap="soft" class="textarea <?php if(!empty($err['com'])) echo 'active'; ?>"><?php if(!empty($err)) echo $com; ?></textarea>
+                                    <span class="errText"><?php if(!empty($err['com'])) { echo $err['com'];} ?></span>
+                                </td>
                             </tr>
                             <tr>
                                 <th class="table_title">U　R　L</th>
-                                <td colspan="3" class="table_data"><input type="url" name="url" size="63" value="http://" class="input"></td>
+                                <td colspan="3" class="table_data"><input type="url" name="url" size="63" value="http://<?php if(!empty($err)) echo str_replace('http://', '', $url); ?>" class="input"></td>
                             </tr>
                             <tr>
                                 <th class="table_title">添付File</th>
-                                <td colspan="3" class="table_data"><input type="file" name="upfile" size="35" value="http://"></td>
+                                <td colspan="3" class="table_data">
+                                    <input type="file" name="upfile" size="35">
+                                    <span class="errText"><?php if(!empty($err['upfile'])) { echo $err['upfile'];} ?></span>
+                                </td>
                             </tr>
                             <tr>
                                 <th class="table_title">削除キー</th>

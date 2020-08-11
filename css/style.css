@@ -161,6 +161,14 @@
     padding: 2px;
 }
 
+.input.active {
+    border: 1px solid red;
+}
+
+input[type="file"] {
+    display: block;
+}
+
 .input-delete {
     width: 60px;
 }
@@ -174,6 +182,9 @@
     padding: 2px;
 }
 
+.textarea.active {
+    border: 1px solid red;
+}
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  btn  「「「「「「「「「「「
@@ -208,4 +219,8 @@
 
 .contents {
     padding: 100px 10px;
+}
+
+.errText {
+    color: red;
 }
