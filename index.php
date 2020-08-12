@@ -1,7 +1,7 @@
 <?php
 
 //定数
-const LOGFILE = 'imglog2.log';
+const LOGFILE = './imglog.json';
 const PATH = './img/';
 const MAX_KB = '100';
 const MAX_W = '250';
@@ -44,10 +44,6 @@ if(!empty($_POST)) {
         $err['name'] = '名前が書きこまれていません';
     }
 
-    // if($sub === '' || ctype_space($sub)) {
-    //     $sub = '(無題)';
-    // }
-
     if($com === '' || ctype_space($com)) {
         $err['com'] = '本文が書き込まれていません';
     }
@@ -65,7 +61,38 @@ if(!empty($_POST)) {
             $err['upfile'] = '画像サイズが100KBを超えています';
         }
     }
+
+    //バリデーションチェックをクリアした場合
+    if(empty($err)) {
+
+        //タイトルが未入力の場合は「(無題)」にする
+        if($sub === '' || ctype_space($sub)) {
+            $sub = '(無題)';
+        }
+
+        //各入力項目を配列に格納
+        // $article = [$name, $email, $sub, $com, $url, $upfile];
+        $article = array(
+            "name" => $name,
+            "email" => $email,
+            "sub" => $sub,
+            "com" => $com,
+            "url" => $url,
+            "upfile" => $upfile
+        );
+
+        //logファイルを開いてjson形式で書き込む
+        $inp = file_get_contents(LOGFILE);
+        $tempArray = json_decode($inp);
+        array_push($tempArray, $article);
+        $jsonData = json_encode($tempArray, JSON_UNESCAPED_UNICODE);
+        file_put_contents(LOGFILE, $jsonData);
+
+    }
+
+
 }
+
 
 ?>
 
