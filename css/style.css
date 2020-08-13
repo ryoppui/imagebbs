@@ -14,6 +14,14 @@
     margin-top: 10px;
 }
 
+.block-spaceM {
+    margin-top: 20px;
+}
+
+.block-spaceL {
+    margin-top: 30px;
+}
+
 .block-right {
     text-align: right;
 }
@@ -23,9 +31,22 @@
     margin: 10px auto;
 }
 
+.block-article {
+    width: 540px;
+    margin: 10px auto 0;
+}
+
+.block-article:first-child {
+    margin: 0 auto;
+}
+
 .block-border {
     border-top: 1px solid gray;
+}
 
+.block_body-flexAlignCenter {
+    display: flex;
+    align-items: center;
 }
 
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
@@ -46,6 +67,23 @@
     color: #800000;
 }
 
+.title_text-color {
+    color: #cc1105;
+}
+
+.title_text-sizeS {
+    font-size: 1.1rem;
+}
+
+.title_text-sizeM {
+    font-size: 1.3rem;
+}
+
+.title_text-sizeL {
+    font-size: 1.5rem;
+}
+
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  textBox 「「「「「「「「「「「
@@ -53,6 +91,16 @@
 「「「「「「「「「「「「「「「「「「「「「「「「「「 */
 .textBox {
     width: 100%;
+}
+
+.textBox-flexAlignCenter {
+    display: flex;
+    align-items: center;
+}
+
+.textBox-num {
+    width: auto;
+    margin-right: 5px;
 }
 
 .textBox-inlineBlock {
@@ -64,8 +112,33 @@
     text-align: justify;
 }
 
+.textBox_text-spaceRightS {
+    margin-right: 5px;
+}
+
 .textBox_text-sizeS {
     font-size: 1.1rem;
+}
+
+.textBox_text-sizeM {
+    font-size: 1.3rem;
+}
+
+.textBox_text-color {
+    color: #cc1105;
+}
+
+.textBox_text-color2 {
+    color: #117743;
+}
+
+.textBox_text-left {
+    text-align: left;
+}
+
+.textBox_text-wrap {
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .textBox-list {
@@ -185,6 +258,7 @@ input[type="file"] {
 .textarea.active {
     border: 1px solid red;
 }
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  btn  「「「「「「「「「「「
@@ -213,7 +287,6 @@ input[type="file"] {
 
 .l-contents {
     background: #FFFFEE;
-    height: 100vh;
     text-align: center;
 }
 

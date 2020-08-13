@@ -1,97 +1,107 @@
 <?php
 
-//定数
-const LOGFILE = './imglog.json';
-const PATH = './img/';
-const MAX_KB = '100';
-const MAX_W = '250';
-const MAX_H = '250';
+    //定数
+    const LOGFILE = './imglog.csv';
+    const PATH = './img/';
+    const MAX_KB = '100';
+    const MAX_W = '250';
+    const MAX_H = '250';
 
-const PAGE_DEF = '7';
-const LOG_MAX = '200';
+    const PAGE_DEF = '7';
+    const LOG_MAX = '200';
 
-const ADMIN_PASS ='0123';
-const CHECK = 1;
-const SOON_ICON = 'soon.jpg';
+    const ADMIN_PASS ='0123';
+    const CHECK = 1;
+    const SOON_ICON = 'soon.jpg';
 
-const BUNRI = 0;
+    const BUNRI = 0;
 
-//変数
-//POST内容
-$name = '';
-$email = '';
-$sub = '';
-$com = '';
-$url = '';
-$upfile = '';
-$pwd = '';
-//エラーメッセージ
-$err = [];
+    //変数
+    //POST内容
+    $name = '';
+    $email = '';
+    $sub = '';
+    $com = '';
+    $url = '';
+    $upfile = '';
+    $pwd = '';
+    //エラーメッセージ
+    $err = [];
+    //ログファイルから一行ごとに配列に
+    $lines = file(LOGFILE);
 
-//POST送信があった場合
-if(!empty($_POST)) {
-    //POSTの中身をそれぞれ変数に
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $sub = $_POST['sub'];
-    $com = $_POST['com'];
-    $url = $_POST['url'];
-    $upfile = $_FILES['upfile'];
-    $pwd = $_POST['pwd'];
 
-    //バリデーションチェック
-    if($name === '' || ctype_space($name)) {
-        $err['name'] = '名前が書きこまれていません';
-    }
+    //POST送信があった場合
+    if(!empty($_POST)) {
+        //POSTの中身をそれぞれ変数に
+        $name = $_POST['name'];
+        $email = $_POST['email'];
+        $sub = $_POST['sub'];
+        $com = $_POST['com'];
+        $url = $_POST['url'];
+        $upfile = $_FILES['upfile'];
+        $pwd = $_POST['pwd'];
 
-    if($com === '' || ctype_space($com)) {
-        $err['com'] = '本文が書き込まれていません';
-    }
-
-    if(mb_strlen($com) > 1000) {
-        $err['com'] = '本文が長すぎますっ！';
-    }
-
-    if($upfile['size'] !== 0) {
-
-        if(exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_PNG && exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_JPEG &&
-        exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_GIF) {
-            $err['upfile'] = '画像はGIF,JPG,PNGのいずれかにしてください';
-        } else if($upfile['size'] > 100000 ) {
-            $err['upfile'] = '画像サイズが100KBを超えています';
-        }
-    }
-
-    //バリデーションチェックをクリアした場合
-    if(empty($err)) {
-
-        //タイトルが未入力の場合は「(無題)」にする
-        if($sub === '' || ctype_space($sub)) {
-            $sub = '(無題)';
+        //バリデーションチェック
+        if($name === '' || ctype_space($name)) {
+            $err['name'] = '名前が書きこまれていません';
         }
 
-        //各入力項目を配列に格納
-        // $article = [$name, $email, $sub, $com, $url, $upfile];
-        $article = array(
-            "name" => $name,
-            "email" => $email,
-            "sub" => $sub,
-            "com" => $com,
-            "url" => $url,
-            "upfile" => $upfile
-        );
+        if($com === '' || ctype_space($com)) {
+            $err['com'] = '本文が書き込まれていません';
+        }
 
-        //logファイルを開いてjson形式で書き込む
-        $inp = file_get_contents(LOGFILE);
-        $tempArray = json_decode($inp);
-        array_push($tempArray, $article);
-        $jsonData = json_encode($tempArray, JSON_UNESCAPED_UNICODE);
-        file_put_contents(LOGFILE, $jsonData);
+        if(mb_strlen($com) > 1000) {
+            $err['com'] = '本文が長すぎますっ！';
+        }
+
+        if($upfile['size'] !== 0) {
+
+            if(exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_PNG && exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_JPEG &&
+            exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_GIF) {
+                $err['upfile'] = '画像はGIF,JPG,PNGのいずれかにしてください';
+            } else if($upfile['size'] > 100000 ) {
+                $err['upfile'] = '画像サイズが100KBを超えています';
+            }
+        }
+
+        //バリデーションチェックをクリアした場合
+        if(empty($err)) {
+
+            //タイトルが未入力の場合は「(無題)」にする
+            if($sub === '' || ctype_space($sub)) {
+                $sub = '(無題)';
+            }
+
+            //画像のアップロードがあった場合はimagesディレクトリへ保存、ログにはファイルパスを保存
+            if($upfile['size'] !== 0) {
+                $file_path = './images/'.$upfile['name'];
+                move_uploaded_file($upfile['tmp_name'], $file_path);
+            } else {
+                //画像アップロードがなかった場合ログファイルには空欄で保存
+                $file_path = '';
+            }
+
+            //各入力項目を配列に格納
+            $arr = array(
+                "name" => $name,
+                "email" => $email,
+                "sub" => $sub,
+                "com" => $com,
+                "url" => $url,
+                "upfile" => $file_path,
+                "created_at" => date("Y-m-d H:i:s")
+            );
+
+            //logファイルを開いてcsv形式で書き込む
+            $fp = fopen(LOGFILE, 'a');
+            fputcsv($fp, $arr);
+            fclose($fp);
+
+        }
+
 
     }
-
-
-}
 
 
 ?>
@@ -201,6 +211,38 @@ if(!empty($_POST)) {
                         </li>
                     </ul>
                 </form>
+            </div>
+            <div class="block block-spaceL">
+                <?php if(!empty($lines)) { foreach($lines as $index => $line) {
+                list($name, $email, $sub, $com, $url, $upfile, $created_at) = explode(',', $line); ?>
+                    <div class="block block-article">
+                        <div class="block_body block_body-flexAlignCenter">
+                            <div class="textBox textBox-num">
+                                <p class="textBox_text textBox_text-left">NO.<?php echo $index ?></p>
+                            </div>
+                            <div class="title title-borderNone">
+                                <h2 class="title_text title_text-color title_text-sizeL"><?php echo $sub?></h2>
+                            </div>
+                        </div>
+                        <div class="block_body block_body-flexAlignCenter">
+                            <dl class="textBox textBox-flexAlignCenter">
+                                <dt class="textBox_text textBox_text-spaceRightS">Name</dt>
+                                <dd class="textBox_text"><a href="#" class="textBox_text textBox_text-color2"><?php echo $name?></a></dd>
+                            </dl>
+                            <dl class="textBox textBox-flexAlignCenter">
+                                <dt class="textBox_text textBox_text-spaceRightS">Date</dt>
+                                <dd class="textBox_text"><?php echo $created_at?></dd>
+                            </dl>
+                            <dl class="textBox textBox-flexAlignCenter">
+                                <dt class="textBox_text textBox_text-spaceRightS">URL</dt>
+                                <dd class="textBox_text"><?php echo $url ?></dd>
+                            </dl>
+                        </div>
+                        <div class="textBox">
+                            <p class="textBox_text textBox_text-wrap"><?php echo $com ?></p>
+                        </div>
+                    </div>
+                <?php }} ?>
             </div>
             <div class="block block-right block-border">
                 <div class="block block-spaceS">
