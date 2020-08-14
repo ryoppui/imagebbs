@@ -1,5 +1,16 @@
 @charset "utf-8";
 
+
+/* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「 body「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「 */
+
+.l-body {
+    background: #FFFFEE;
+}
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「 block「「「「「「「「「「「「「「「
@@ -33,7 +44,9 @@
 
 .block-article {
     width: 540px;
-    margin: 10px auto 0;
+    margin: 20px auto 0;
+    background-color: #fff;
+    padding: 10px;
 }
 
 .block-article:first-child {
@@ -47,6 +60,10 @@
 .block_body-flexAlignCenter {
     display: flex;
     align-items: center;
+}
+
+.block_body-spaceS {
+    margin-top: 10px;
 }
 
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
@@ -210,6 +227,11 @@
     align-items: flex-end;
 }
 
+.table_data_flexEnd {
+    display: flex;
+    align-items: flex-end;
+}
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  input textarea「「「「「「「「「「「
@@ -286,7 +308,6 @@ input[type="file"] {
 「「「「「「「「「「「「「「「「「「「「「「「「「「 */
 
 .l-contents {
-    background: #FFFFEE;
     text-align: center;
 }
 

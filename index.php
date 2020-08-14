@@ -27,8 +27,31 @@
     $pwd = '';
     //エラーメッセージ
     $err = [];
-    //ログファイルから一行ごとに配列に
+    //ログファイルnの中身を変数に
     $lines = file(LOGFILE);
+
+
+    //関数
+    //画像のサイズが規定を超えていたら縮小する
+    function imageCustom($upfile) {
+        if(!empty($upfile)) {
+            $image_info = getimagesize($upfile);
+            $width = $image_info[0];
+            $height = $image_info[1];
+
+            if($width > 250 || $height > 250) {
+                $width2 = 250 / $width;
+                $height2 = 250 / $height;
+
+                ($width2 < $height2) ? $key = $width2 : $key = $height2;
+
+                $width = $width * $key;
+                $height = $height * $key;
+            }
+            return [$width, $height];
+        }
+    }
+
 
 
     //POST送信があった場合
@@ -43,26 +66,35 @@
         $pwd = $_POST['pwd'];
 
         //バリデーションチェック
+        //名前の入力があるか
         if($name === '' || ctype_space($name)) {
             $err['name'] = '名前が書きこまれていません';
         }
 
+        //本文の入力があるか
         if($com === '' || ctype_space($com)) {
             $err['com'] = '本文が書き込まれていません';
-        }
-
-        if(mb_strlen($com) > 1000) {
+        } else if(mb_strlen($com) > 1000) { //1000文字を超えていないか
             $err['com'] = '本文が長すぎますっ！';
         }
 
+        //画像のアップロードがある場合
         if($upfile['size'] !== 0) {
 
+            //画像のマイムタイプをチェック
             if(exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_PNG && exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_JPEG &&
             exif_imagetype($upfile['tmp_name']) !== IMAGETYPE_GIF) {
                 $err['upfile'] = '画像はGIF,JPG,PNGのいずれかにしてください';
-            } else if($upfile['size'] > 100000 ) {
+            } else if($upfile['size'] > 100000 ) { //画像の容量をチェック
                 $err['upfile'] = '画像サイズが100KBを超えています';
             }
+        }
+
+        //削除キーの入力があるか
+        if($pwd === '' || ctype_space($pwd)) {
+            $err['pwd'] = '削除キーの入力がありません';
+        } else if(!preg_match("/^[0-9]+$/", $pwd )) { //半角数字になっているか
+            $err['pwd'] = '半角数字で入力してください';
         }
 
         //バリデーションチェックをクリアした場合
@@ -71,6 +103,16 @@
             //タイトルが未入力の場合は「(無題)」にする
             if($sub === '' || ctype_space($sub)) {
                 $sub = '(無題)';
+            }
+
+            //コメントの改行コードを置換
+            if(!empty($com)) {
+                $com = str_replace(array("\r\n", "\n", "\r"), "<br>", $com);
+            }
+
+            //URLの入力がなかったら「none」にする
+            if($url === 'http://' || $url === '' || ctype_space($url)) {
+                $url = 'none';
             }
 
             //画像のアップロードがあった場合はimagesディレクトリへ保存、ログにはファイルパスを保存
@@ -82,6 +124,11 @@
                 $file_path = '';
             }
 
+            //パスワードをハッシュ化
+            if(!empty($pwd)) {
+                $pwd = password_hash($pwd, PASSWORD_DEFAULT);
+            }
+
             //各入力項目を配列に格納
             $arr = array(
                 "name" => $name,
@@ -90,6 +137,7 @@
                 "com" => $com,
                 "url" => $url,
                 "upfile" => $file_path,
+                "pwd" => $pwd,
                 "created_at" => date("Y-m-d H:i:s")
             );
 
@@ -98,11 +146,9 @@
             fputcsv($fp, $arr);
             fclose($fp);
 
+            header('Location:'.$_SERVER['PHP_SELF']);
         }
-
-
     }
-
 
 ?>
 
@@ -121,7 +167,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
+<body class="l-body">
     <div class="l-contents">
         <div class="contents">
             <div class="block block-right">
@@ -139,13 +185,12 @@
             </div>
             <div class="block block-content">
                 <form method="post" enctype="multipart/form-data" action="#" class="form" novalidate="novalidate">
-                    <!-- <input type="hidden" name="MAX_FILE_SIZE" value="100000"> -->
                     <table class="table">
                         <tbody>
                             <tr>
                                 <th class="table_title">おなまえ</th>
                                 <td class="table_data" colspan="3">
-                                    <input type="text" name="name" size="28" value="<?php if(!empty($err)) echo $name; ?>" class="input <?php if(!empty($err_name)) echo 'active'; ?>">
+                                    <input type="text" name="name" size="28" value="<?php if(!empty($err)) echo $name; ?>" class="input <?php if(!empty($err['name'])) echo 'active'; ?>">
                                     <span class="errText"><?php if(!empty($err['name'])) { echo $err['name'];} ?></span>
                                 </td>
                             </tr>
@@ -179,11 +224,14 @@
                             </tr>
                             <tr>
                                 <th class="table_title">削除キー</th>
-                                <td colspan="3" class="table_data table_data-flexEnd">
-                                    <input type="password" name="pwd" size="8" maxlength="8" class="input">
-                                    <div class="textBox">
-                                        <p class="textBox_text textBox_text-sizeS">(記事の削除用。英数字で8文字以内)</p>
+                                <td colspan="2" class="table_data">
+                                    <div class="table_data_flexEnd">
+                                        <input type="password" name="pwd" size="8" maxlength="8" class="input">
+                                        <div class="textBox">
+                                            <p class="textBox_text textBox_text-sizeS">(記事の削除用。英数字で8文字以内)</p>
+                                        </div>
                                     </div>
+                                    <span class="errText"><?php if(!empty($err['pwd'])) { echo $err['pwd'];} ?></span>
                                 </td>
                             </tr>
                         </tbody>
@@ -214,11 +262,11 @@
             </div>
             <div class="block block-spaceL">
                 <?php if(!empty($lines)) { foreach($lines as $index => $line) {
-                list($name, $email, $sub, $com, $url, $upfile, $created_at) = explode(',', $line); ?>
+                list($name, $email, $sub, $com, $url, $upfile, $pwd, $created_at) = explode(',', $line); ?>
                     <div class="block block-article">
                         <div class="block_body block_body-flexAlignCenter">
                             <div class="textBox textBox-num">
-                                <p class="textBox_text textBox_text-left">NO.<?php echo $index ?></p>
+                                <p class="textBox_text textBox_text-left">NO.<?php echo $index+1 ?></p>
                             </div>
                             <div class="title title-borderNone">
                                 <h2 class="title_text title_text-color title_text-sizeL"><?php echo $sub?></h2>
@@ -227,24 +275,37 @@
                         <div class="block_body block_body-flexAlignCenter">
                             <dl class="textBox textBox-flexAlignCenter">
                                 <dt class="textBox_text textBox_text-spaceRightS">Name</dt>
-                                <dd class="textBox_text"><a href="#" class="textBox_text textBox_text-color2"><?php echo $name?></a></dd>
+                                <dd class="textBox_text">
+                                    <a <?php if(!empty($email)){ ?>href="mailto:<?php echo $email; ?>"<?php } ?> class="textBox_text textBox_text-color2"><?php echo $name?></a>
+                                </dd>
                             </dl>
                             <dl class="textBox textBox-flexAlignCenter">
                                 <dt class="textBox_text textBox_text-spaceRightS">Date</dt>
-                                <dd class="textBox_text"><?php echo $created_at?></dd>
+                                <dd class="textBox_text"><?php echo $created_at ?></dd>
                             </dl>
                             <dl class="textBox textBox-flexAlignCenter">
                                 <dt class="textBox_text textBox_text-spaceRightS">URL</dt>
-                                <dd class="textBox_text"><?php echo $url ?></dd>
+                                <dd class="textBox_text">
+                                    <?php if($url === 'none'){ ?>
+                                        <a><?php echo $url; ?></a>
+                                    <?php }else{ ?>
+                                        <a href="<?php echo $url; ?>"><?php echo $url; ?></a>
+                                    <?php } ?>
+                                </dd>
                             </dl>
                         </div>
+                        <?php if(!empty($upfile)) { list($width, $height) = imageCustom($upfile) ?>
+                        <div class="block_body block_body-spaceS">
+                            <img src="<?php echo $upfile ?>" style="width: <?php echo $width; ?>px; height: <?php echo $height; ?>px;" alt="">
+                        </div>
+                        <?php } ?>
                         <div class="textBox">
                             <p class="textBox_text textBox_text-wrap"><?php echo $com ?></p>
                         </div>
                     </div>
                 <?php }} ?>
             </div>
-            <div class="block block-right block-border">
+            <div class="block block-right block-border block-spaceL">
                 <div class="block block-spaceS">
                     <form method="post" class="form form-delete" novalidate="novalidate">
                         <table class="table table-delete">
