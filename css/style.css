@@ -222,6 +222,10 @@
     text-align: left;
 }
 
+.table_data-center {
+    text-align: center;
+}
+
 .table_data-flexEnd {
     display: flex;
     align-items: flex-end;
