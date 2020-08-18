@@ -27,9 +27,14 @@
     $pwd = '';
     //エラーメッセージ
     $err = [];
-    //ログファイルnの中身を変数に
-    $lines = file(LOGFILE);
-
+    //ログファイル全件
+	$lines = file(LOGFILE);
+	//データの総件数
+	$lines_num = count($lines);
+	//トータルページ数
+	$max_page = ceil($lines_num / PAGE_DEF);
+	//ゲットパラメータのページ
+	$page = $_GET['page'];
 
     //関数
     //画像のサイズが規定を超えていたら縮小する
@@ -52,6 +57,18 @@
         }
     }
 
+
+	//ページ表示の処理
+	//GETパラメータから表示するページを取得
+	if(!isset($page)) {
+		$now = 1;
+	} else {
+		$now = $page;
+	}
+	//何件目から表示させるか
+	$start_no = ($now - 1) * PAGE_DEF;
+	//1ページ分のデータを取得
+	$show_data = array_slice($lines, $start_no, PAGE_DEF, true);
 
 
     //POST送信(register)があった場合
@@ -209,7 +226,7 @@
 
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=width=1000">
+	<meta name="viewport" content="width=1000">
 	<meta name="format-detection" content="telephone=no">
 	<meta name="apple-mobile-web-app-title" content="画像BBS">
 	<meta name="keywords" content="画像BBS">
@@ -228,12 +245,12 @@
 						<p>[<a href="http://php.s3.to/">ホーム</a>]</p>
 					</li>
 					<li class="list_item">
-						<p>[<a href="http://php.s3.to/">管理用</a>]</p>
+						<p>[<a href="./admin.php">管理用</a>]</p>
 					</li>
 				</ul>
 			</div>
 			<div class="title">
-				<h1 class="title_text">画像BBS</h1>
+				<h1 class="title_text"><a class="title_text_anchor" href="/">画像BBS</a></h1>
 			</div>
 			<div class="block block-content">
 				<form method="post" enctype="multipart/form-data" action="#" class="form" novalidate="novalidate">
@@ -314,7 +331,7 @@
 				</form>
 			</div>
 			<div class="block block-spaceL">
-				<?php if(!empty($lines)) { foreach($lines as $index => $line) {
+				<?php if(!empty($lines)) { foreach($show_data as $index => $line) {
                 list($name, $email, $sub, $com, $url, $upfile, $pwd, $created_at) = explode(',', $line); ?>
 				<div class="block block-article">
 					<div class="block_body block_body-flexAlignCenter">
@@ -357,6 +374,29 @@
 					</div>
 				</div>
 				<?php }} ?>
+				<div class="pagination">
+					<div class="pagination_list">
+						<?php if($now == 1) {?>
+							<a class="pagination_list_item">&lt;</a>
+						<?php } else { ?>
+							<a href="/?page=<?php echo $page-1; ?>" class="pagination_list_item">&lt;</a>
+						<?php } ?>
+					</div>
+					<ol class="pagination_list">
+						<?php for($i = 1; $i <= $max_page; $i++) { if($i == $now) { ?>
+							<li class="pagination_list_item"><a><?php echo $i; ?></a></li>
+						<?php } else { ?>
+							<li class="pagination_list_item"><a href="/?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+						<?php }} ?>
+					</ol>
+					<div class="pagination_list">
+						<?php if($now == $max_page) {?>
+							<a class="pagination_list_item">&gt;</a>
+						<?php } else { ?>
+							<a href="/?page=<?php echo $page+1; ?>" class="pagination_list_item pagination_list_item-last">&gt;</a>
+						<?php } ?>
+					</div>
+				</div>
 			</div>
 			<div class="block block-right block-border block-spaceL">
 				<div class="block block-spaceS">
