@@ -66,6 +66,10 @@
 	margin-top: 10px;
 }
 
+.block_body-right {
+	text-align: right;
+}
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「  title 「「「「「「「「「「「
@@ -242,6 +246,10 @@
 	align-items: flex-end;
 }
 
+.table-admin .table_data {
+	text-align: right;
+}
+
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「 form 「「「「「「「「「「「
@@ -257,9 +265,9 @@
 	margin: 10px auto 0;
 }
 
-.form-admin {
+/* .form-admin {
 	display: inline-block;
-}
+} */
 
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
 「「「「「「「「「「「「「「「「「「「「「「「「「「
@@ -326,6 +334,10 @@ input[type="file"] {
 
 .btn-delete {
 	width: 40px;
+}
+
+.btn-admin {
+	width: 80px;
 }
 
 /* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
