@@ -398,3 +398,19 @@ input[type="file"] {
 .pagination_list a {
 	font-size: 15px;
 }
+
+/* 「「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「 フラッシュメッセージ「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「
+「「「「「「「「「「「「「「「「「「「「「「「「「「 */
+
+.flashMessage {
+	background-color: lightblue;
+	padding: 10px 0;
+	position: fixed;
+	top: 0;
+	color: #fff;
+	width: 100%;
+	display: none;
+}

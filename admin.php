@@ -1,21 +1,9 @@
 <?php
-	session_start();
 
     //定数
     const LOGFILE = './imglog.csv';
-    const PATH = './img/';
-    const MAX_KB = '100';
-    const MAX_W = '250';
-    const MAX_H = '250';
-
     const PAGE_DEF = '7';
-    const LOG_MAX = '200';
-
     const ADMIN_PASS ='0123';
-    const CHECK = 1;
-    const SOON_ICON = 'soon.jpg';
-
-    const BUNRI = 0;
 
     //変数
     //POST内容
@@ -30,13 +18,20 @@
     //エラーメッセージ
     $err = [];
     //ログファイル全件
-	$lines = file(LOGFILE);
+	$lines = array_reverse(file(LOGFILE), true);
 	//データの総件数
 	$lines_num = count($lines);
 	//トータルページ数
 	$max_page = ceil($lines_num / PAGE_DEF);
 	//ゲットパラメータのページ
 	$page = $_GET['page'];
+
+
+	//セッション
+	session_start();
+	//フラッシュメッセージ初期化
+	$flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : array();
+	unset($_SESSION['flash']);
 
 
     //関数
@@ -58,7 +53,14 @@
             }
             return [$width, $height];
         }
-    }
+	}
+
+	//フラッシュメッセージ
+	function flashMessage($msg) {
+		global $flash;
+		$_SESSION['flash'] = $msg;
+		$flash = $_SESSION['flash'];
+	}
 
 
 	//ページ表示の処理
@@ -121,6 +123,7 @@
 				}
 			}
 
+			flashMessage('削除しました');
 			header('Location:'.$_SERVER['PHP_SELF']);
 		}
 
@@ -146,6 +149,11 @@
 
 <body class="l-body">
 	<div class="l-contents">
+		<?php if(!empty($flash)) {?>
+		<div class="flashMessage js-flash">
+			<p class="flashMessage_text"><?php echo $flash; ?></p>
+		</div>
+		<?php } ?>
 		<div class="contents">
 			<div class="block block-right">
 				<ul class="list list-inlineFlex">
@@ -215,6 +223,7 @@
 								</div>
 							</div>
 						<?php }} ?>
+						<?php if(!empty($lines)) { ?>
 						<div class="pagination">
 							<div class="pagination_list">
 								<?php if($now == 1) {?>
@@ -238,6 +247,7 @@
 								<?php } ?>
 							</div>
 						</div>
+						<?php } ?>
 					</div>
 					<div class="block block-right block-border block-spaceL">
 						<div class="block block-spaceS">
@@ -282,6 +292,8 @@
 			</footer>
 		</div>
 	</div>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="./js/script.js"></script>
 </body>
 
 </html>
