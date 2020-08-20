@@ -1,8 +1,5 @@
 <?php
 
-
-
-
     //定数
     const LOGFILE = './imglog.csv';
     const PAGE_DEF = '7';
@@ -19,6 +16,8 @@
 	$pwd = '';
     //エラーメッセージ
 	$err = [];
+	//フラッシュメッセージ
+	$flash = '';
     //ログファイル全件
 	$lines = array_reverse(file(LOGFILE), true);
 	//データの総件数
@@ -380,10 +379,10 @@
 					</div>
 					<?php if(!empty($upfile)) { list($width, $height) = imageCustom($upfile) ?>
 					<div class="block_body block_body-spaceS">
-						<img src="<?php echo $upfile ?>" style="width: <?php echo $width; ?>px; height: <?php echo $height; ?>px;" alt="">
+						<a href="<?php echo $upfile?>" target="_blank"><img src="<?php echo $upfile ?>" style="width: <?php echo $width; ?>px; height: <?php echo $height; ?>px;" alt=""></a>
 					</div>
 					<?php } ?>
-					<div class="textBox">
+					<div class="textBox textBox-spaceM">
 						<p class="textBox_text textBox_text-wrap"><?php echo $com ?></p>
 					</div>
 				</div>

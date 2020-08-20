@@ -120,6 +120,10 @@
 	width: 100%;
 }
 
+.textBox-spaceM {
+	margin-top: 10px;
+}
+
 .textBox-flexAlignCenter {
 	display: flex;
 	align-items: center;
@@ -138,6 +142,7 @@
 .textBox_text {
 	text-align: justify;
 }
+
 
 .textBox_text-spaceRightS {
 	margin-right: 5px;
