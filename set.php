@@ -20,13 +20,25 @@ $err = [];
 //フラッシュメッセージ
 $flash = '';
 //ログファイル全件
-$lines = array_reverse(file(LOGFILE), true);
+// $lines = array_reverse(file(LOGFILE), true);
 //データの総件数
-$lines_num = count($lines);
-//トータルページ数
-$max_page = ceil($lines_num / PAGE_DEF);
-//ゲットパラメータのページ
-$page = $_GET['page'];
+// $lines_num = count($lines);
+// //トータルページ数
+// $max_page = ceil($lines_num / PAGE_DEF);
+// //ゲットパラメータのページ
+// $page = $_GET['page'];
+
+// //ページ表示の処理
+// //GETパラメータから表示するページを取得
+// if (!isset($page)) {
+//     $now = 1;
+// } else {
+//     $now = $page;
+// }
+// //何件目から表示させるか
+// $start_no = ($now - 1) * PAGE_DEF;
+// //1ページ分のデータを取得
+// $show_data = array_slice($lines, $start_no, PAGE_DEF, true);
 
 
 //関数
@@ -109,13 +121,96 @@ class Validation
     }
 
     //半角数字チェック
-    public static function halfNumber($post, $errPoint)
+    public static function halfNumber($post, $errPoint, $errMessage)
     {
-
         global $err;
 
         if (!preg_match("/^[0-9]+$/", $post)) {
-            $err[$errPoint] = '半角数字で入力してください';
+            $err[$errPoint] = $errMessage;
+        }
+    }
+
+    //パスワードチェック
+    public static function passCheck($pass, $errPoint)
+    {
+        global $err;
+
+        if ($pass !== ADMIN_PASS) {
+            $err[$errPoint] = 'パスワードが違います';
+        }
+    }
+
+    //管理者削除チェック
+    public static function radioCheck($post, $errPoint)
+    {
+        global $err;
+
+        if (!isset($post)) {
+            $err[$errPoint] = '削除する記事を選択してください';
+        }
+    }
+}
+
+
+//ログファイルクラス
+class File
+{
+    private $all;
+
+    function __construct()
+    {
+        $this->all = array_reverse(file(LOGFILE), true);
+    }
+
+    //全件取得
+    public function findAll()
+    {
+        return  $this->all;
+    }
+
+    //データ表示
+    public function showData()
+    {
+        //データの総件数
+        $lines_num = count($this->all);
+        //トータルページ数
+        $max_page = ceil($lines_num / PAGE_DEF);
+        //ゲットパラメータのページ
+        $page = $_GET['page'];
+
+        //ページ表示の処理
+        //GETパラメータから表示するページを取得
+        if (!isset($page)) {
+            $now = 1;
+        } else {
+            $now = $page;
+        }
+        //何件目から表示させるか
+        $start_no = ($now - 1) * PAGE_DEF;
+        //1ページ分のデータを取得
+        $show_data = array_slice($this->all, $start_no, PAGE_DEF, true);
+
+        return $show_data;
+    }
+
+    //ファイル更新
+    public function update($arr)
+    {
+        $fp = fopen(LOGFILE, 'a');
+        fputcsv($fp, $arr);
+        fclose($fp);
+    }
+
+    //ファイルデータ削除
+    public function delete($no, $upfile)
+    {
+        $log_file = file(LOGFILE);
+        unset($log_file[$no - 1]);
+        file_put_contents(LOGFILE, $log_file);
+
+        //画像データの投稿があれば画像も削除
+        if (!empty($upfile)) {
+            unlink($upfile);
         }
     }
 }

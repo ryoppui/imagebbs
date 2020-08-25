@@ -9,32 +9,17 @@ $flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : array();
 unset($_SESSION['flash']);
 
 
-//ページ表示の処理
-//GETパラメータから表示するページを取得
-if (!isset($page)) {
-    $now = 1;
-} else {
-    $now = $page;
-}
-//何件目から表示させるか
-$start_no = ($now - 1) * PAGE_DEF;
-//1ページ分のデータを取得
-$show_data = array_slice($lines, $start_no, PAGE_DEF, true);
-
-
 //POST送信(login)があった場合
 if (!empty($_POST['login'])) {
 
     $pass = $_POST['pass'];
 
     //バリデーション
-    if ($pass === '' || ctype_space($pass)) {
-        $err['pass'] = 'パスワードが入力されていません';
-    } else if (!preg_match("/^[0-9]+$/", $pass)) {
-        $err['pass'] = '半角数字で入力してください';
-    } else if ($pass !== ADMIN_PASS) {
-        $err['pass'] = 'パスワードが違います';
-    } else {
+    Validation::passCheck($pass, 'pass');
+    Validation::halfNumber($pass, 'pass', '半角数字で入力してください');
+    Validation::required($pass, 'pass', 'パスワードが入力されていません');
+
+    if (empty($err)) {
         $_SESSION['admin'] = true;
     }
 }
@@ -43,26 +28,24 @@ if (!empty($_POST['login'])) {
 if (!empty($_POST['admin']) && $_POST['logout']) {
     session_destroy();
     header('Location:' . $_SERVER['PHP_SELF']);
-} elseif (!empty($_POST['admin']) && $_POST['delete']) { //POST送信(delete)があった場合
+
+    //POST送信(delete)があった場合
+} elseif (!empty($_POST['admin']) && $_POST['delete']) {
     $delete_no = $_POST['delete_radio'];
 
-    if (!isset($delete_no)) {
+    Validation::radioCheck($delete_no, 'delete');
 
-        $err['delete'] = '削除する記事を選択してください';
-    } else {
+    if (isset($delete_no)) {
+
         foreach ($lines as $index => $line) {
             list(,,,,, $upfile,,,) = explode(',', $line);
 
-            //POSTされた記事Noと削除キーがそれぞれ一致したらログファイルから該当のデータを削除
+            //POSTされた記事Noとインデックスがそれぞれ一致したらログファイルから該当のデータを削除
             if ($delete_no == $index) {
-                $file = file(LOGFILE);
-                unset($file[$index]);
-                file_put_contents(LOGFILE, $file);
 
-                //画像データの投稿があれば画像も削除
-                if (!empty($upfile)) {
-                    unlink($upfile);
-                }
+                $file = new File();
+
+                $file->delete($delete_no + 1, $upfile);
             }
         }
 
@@ -70,6 +53,7 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
         header('Location:' . $_SERVER['PHP_SELF']);
     }
 }
+
 
 
 ?>

@@ -9,19 +9,6 @@ $flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : array();
 unset($_SESSION['flash']);
 
 
-//ページ表示の処理
-//GETパラメータから表示するページを取得
-if (!isset($page)) {
-    $now = 1;
-} else {
-    $now = $page;
-}
-//何件目から表示させるか
-$start_no = ($now - 1) * PAGE_DEF;
-//1ページ分のデータを取得
-$show_data = array_slice($lines, $start_no, PAGE_DEF, true);
-
-
 //POST送信(register)があった場合
 if (!empty($_POST['regist'])) {
     //POSTの中身をそれぞれ変数に
@@ -39,7 +26,7 @@ if (!empty($_POST['regist'])) {
     Validation::required($com, 'com', '本文が書き込まれていません');
     Validation::maxLength($com, 'com', '本文が長すぎますっ！');
     Validation::imgType($upfile['size'], $upfile['tmp_name']);
-    Validation::halfNumber($pwd, 'pwd');
+    Validation::halfNumber($pwd, 'pwd', '半角数字で入力してください');
     Validation::required($pwd, 'pwd', '削除キーの入力がありません');
 
 
@@ -87,10 +74,9 @@ if (!empty($_POST['regist'])) {
             "created_at" => date("Y-m-d H:i:s")
         );
 
-        //logファイルを開いてcsv形式で書き込む
-        $fp = fopen(LOGFILE, 'a');
-        fputcsv($fp, $arr);
-        fclose($fp);
+        $file = new File();
+
+        $file->update($arr);
 
         flashMessage('投稿しました');
         header('Location:' . $_SERVER['PHP_SELF']);
@@ -104,37 +90,29 @@ if (!empty($_POST['regist'])) {
     $pwd = $_POST['pwd'];
 
     //各バリデーションチェック
-    if ($no === '' || ctype_space($no)) {
-        $err['no'] = '記事Noの入力がありません';
-    } else if (!preg_match("/^[0-9]+$/", $no)) {
-        $err['no'] = '記事Noは半角数字で入力してください';
-    }
+    Validation::halfNumber($no, 'no', '記事Noは半角数字で入力してください');
+    Validation::required($no, 'no', '記事Noの入力がありません');
+    Validation::halfNumber($pwd, 'pwd-delete', '削除キーは半角数字で入力してください');
+    Validation::required($pwd, 'pwd-delete', '削除キーの入力がありません');
 
-    if ($pwd === '' || ctype_space($pwd)) {
-        $err['pwd-delete'] = '削除キーの入力がありません';
-    } else if (!preg_match("/^[0-9]+$/", $pwd)) {
-        $err['pwd-delete'] = '削除キーは半角数字で入力してください';
-    }
 
     //バリデーションチェックをクリアした場合
     if (empty($err)) {
 
-        if (!empty($lines)) {
+        $file = new File();
+
+        if (!empty($file->findAll())) {
 
             //ログファイルの中身を一行ずつ変数へ
-            foreach ($lines as $index => $line) {
+            foreach ($file->findAll() as $index => $line) {
                 list(,,,,, $upfile, $pwd_csv,,) = explode(',', $line);
 
                 //POSTされた記事Noと削除キーがそれぞれ一致したらログファイルから該当のデータを削除
                 if ($no - 1 == $index && password_verify($pwd, $pwd_csv)) {
-                    $file = file(LOGFILE);
-                    unset($file[$no - 1]);
-                    file_put_contents(LOGFILE, $file);
 
-                    //画像データの投稿があれば画像も削除
-                    if (!empty($upfile)) {
-                        unlink($upfile);
-                    }
+                    // $file = new File();
+
+                    $file->delete($no, $upfile);
 
                     flashMessage('削除しました');
                     header('Location:' . $_SERVER['PHP_SELF']);
@@ -272,8 +250,9 @@ if (!empty($_POST['regist'])) {
                 </form>
             </div>
             <div class="block block-spaceL">
-                <?php if (!empty($lines)) {
-                    foreach ($show_data as $index => $line) {
+                <?php $file = new File();
+                if (!empty($file->findAll())) {
+                    foreach ($file->showData() as $index => $line) {
                         list($name, $email, $sub, $com, $url, $upfile, $pwd, $created_at) = explode(',', $line); ?>
                         <div class="block block-article">
                             <div class="block_body block_body-flexAlignCenter">
@@ -309,7 +288,7 @@ if (!empty($_POST['regist'])) {
                             <?php if (!empty($upfile)) {
                                 list($width, $height) = imageCustom($upfile) ?>
                                 <div class="block_body block_body-spaceS">
-                                    <a href="<?php echo $upfile ?>" target="_blank"><img src="<?php echo $upfile; ?>" style="width: <?php echo $width; ?>px; height: <?php echo $height; ?>px;" alt=""></a>
+                                    <a href="<?php echo $upfile; ?>" target="_blank"><img src="<?php echo $upfile; ?>" style="width: <?php echo $width; ?>px; height: <?php echo $height; ?>px;" alt=""></a>
                                 </div>
                             <?php } ?>
                             <div class="textBox textBox-spaceM">
@@ -318,7 +297,7 @@ if (!empty($_POST['regist'])) {
                         </div>
                 <?php }
                 } ?>
-                <?php if (!empty($lines)) { ?>
+                <?php if (!empty($file->findAll())) { ?>
                     <div class="pagination">
                         <div class="pagination_list">
                             <?php if ($now == 1) { ?>
