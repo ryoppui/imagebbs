@@ -2,11 +2,9 @@
 
 require "set.php";
 
-//セッション
-session_start();
 //フラッシュメッセージ初期化
-$flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : array();
-unset($_SESSION['flash']);
+$flash = new Flash();
+$flash->reset();
 
 
 //POST送信(login)があった場合
@@ -37,7 +35,9 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
 
     if (isset($delete_no)) {
 
-        foreach ($lines as $index => $line) {
+        $file = new File();
+
+        foreach ($file->findAll() as $index => $line) {
             list(,,,,, $upfile,,,) = explode(',', $line);
 
             //POSTされた記事Noとインデックスがそれぞれ一致したらログファイルから該当のデータを削除
@@ -49,13 +49,15 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
             }
         }
 
-        flashMessage('削除しました');
+        $flash->setFlash('削除しました');
         header('Location:' . $_SERVER['PHP_SELF']);
     }
 }
 
 
-
+//ページ表示用にインスタンス化
+$file = new File();
+$page = new Pagination();
 ?>
 
 <!DOCTYPE html>
@@ -75,9 +77,9 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
 
 <body class="l-body">
     <div class="l-contents">
-        <?php if (!empty($flash)) { ?>
+        <?php if (!empty($flash->getFlash())) { ?>
             <div class="flashMessage js-flash">
-                <p class="flashMessage_text"><?php echo $flash; ?></p>
+                <p class="flashMessage_text"><?php echo $flash->getFlash(); ?></p>
             </div>
         <?php } ?>
         <div class="contents">
@@ -103,8 +105,8 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
                         <?php if (!empty($err['delete'])) { ?>
                             <span class="errText"><?php echo $err['delete']; ?></span>
                         <?php } ?>
-                        <?php if (!empty($lines)) {
-                            foreach ($show_data as $index => $line) {
+                        <?php if (!empty($file->findAll())) {
+                            foreach ($file->showData() as $index => $line) {
                                 list($name, $email, $sub, $com, $url, $upfile, $pwd, $created_at) = explode(',', $line); ?>
                                 <div class="block block-article">
                                     <div class="block_body block_body-flexAlignCenter">
@@ -152,29 +154,29 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
                                 </div>
                         <?php }
                         } ?>
-                        <?php if (!empty($lines)) { ?>
+                        <?php if (!empty($file->findAll())) { ?>
                             <div class="pagination">
                                 <div class="pagination_list">
-                                    <?php if ($now == 1) { ?>
+                                    <?php if ($page->now() == 1) { ?>
                                         <a class="pagination_list_item">&lt;</a>
                                     <?php } else { ?>
-                                        <a href="/admin.php?page=<?php echo $page - 1; ?>" class="pagination_list_item">&lt;</a>
+                                        <a href="/?page=<?php echo $page->getPage() - 1; ?>" class="pagination_list_item">&lt;</a>
                                     <?php } ?>
                                 </div>
                                 <ol class="pagination_list">
-                                    <?php for ($i = 1; $i <= $max_page; $i++) {
-                                        if ($i == $now) { ?>
+                                    <?php for ($i = 1; $i <= $page->maxPage(); $i++) {
+                                        if ($i == $page->now()) { ?>
                                             <li class="pagination_list_item"><a><?php echo $i; ?></a></li>
                                         <?php } else { ?>
-                                            <li class="pagination_list_item"><a href="/admin.php?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+                                            <li class="pagination_list_item"><a href="/?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
                                     <?php }
                                     } ?>
                                 </ol>
                                 <div class="pagination_list">
-                                    <?php if ($now == $max_page) { ?>
+                                    <?php if ($page->now() == $page->maxPage()) { ?>
                                         <a class="pagination_list_item">&gt;</a>
                                     <?php } else { ?>
-                                        <a href="/admin.php?page=<?php echo $page + 1; ?>" class="pagination_list_item pagination_list_item-last">&gt;</a>
+                                        <a href="/?page=<?php echo $page->getPage() + 1; ?>" class="pagination_list_item pagination_list_item-last">&gt;</a>
                                     <?php } ?>
                                 </div>
                             </div>

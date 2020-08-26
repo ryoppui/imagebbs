@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 //定数
 const LOGFILE = './imglog.csv';
 const PAGE_DEF = '7';
@@ -17,28 +19,6 @@ $pwd = '';
 $pass = '';
 //エラーメッセージ
 $err = [];
-//フラッシュメッセージ
-$flash = '';
-//ログファイル全件
-// $lines = array_reverse(file(LOGFILE), true);
-//データの総件数
-// $lines_num = count($lines);
-// //トータルページ数
-// $max_page = ceil($lines_num / PAGE_DEF);
-// //ゲットパラメータのページ
-// $page = $_GET['page'];
-
-// //ページ表示の処理
-// //GETパラメータから表示するページを取得
-// if (!isset($page)) {
-//     $now = 1;
-// } else {
-//     $now = $page;
-// }
-// //何件目から表示させるか
-// $start_no = ($now - 1) * PAGE_DEF;
-// //1ページ分のデータを取得
-// $show_data = array_slice($lines, $start_no, PAGE_DEF, true);
 
 
 //関数
@@ -63,17 +43,10 @@ function imageCustom($upfile)
     }
 }
 
-//フラッシュメッセージ
-function flashMessage($msg)
-{
-    global $flash;
-    $_SESSION['flash'] = $msg;
-    $flash = $_SESSION['flash'];
-}
 
 
 //クラス
-//バリデーション
+//バリデーションクラス
 class Validation
 {
 
@@ -171,20 +144,16 @@ class File
     //データ表示
     public function showData()
     {
-        //データの総件数
-        $lines_num = count($this->all);
-        //トータルページ数
-        $max_page = ceil($lines_num / PAGE_DEF);
         //ゲットパラメータのページ
         $page = $_GET['page'];
 
-        //ページ表示の処理
         //GETパラメータから表示するページを取得
         if (!isset($page)) {
             $now = 1;
         } else {
             $now = $page;
         }
+
         //何件目から表示させるか
         $start_no = ($now - 1) * PAGE_DEF;
         //1ページ分のデータを取得
@@ -212,5 +181,70 @@ class File
         if (!empty($upfile)) {
             unlink($upfile);
         }
+    }
+}
+
+//ページネーションクラス
+class Pagination
+{
+    private $all;
+    private $page;
+
+    function __construct()
+    {
+        $this->all = array_reverse(file(LOGFILE), true);
+        $this->page = $_GET['page'];
+    }
+
+    //総ページ数
+    public function maxPage()
+    {
+        $lines_num = count($this->all);
+        $max_page = ceil($lines_num / PAGE_DEF);
+
+        return $max_page;
+    }
+
+    //Getパラメーターのゲッター
+    public function getPage()
+    {
+        return $this->page;
+    }
+
+    // 現在ページ
+    public function now()
+    {
+        if (!isset($this->page)) {
+            $now = 1;
+        } else {
+            $now = $this->page;
+        }
+        return $now;
+    }
+}
+
+//フラッシュメッセージクラス
+class Flash
+{
+    private $flash;
+
+    //初期化
+    public function reset()
+    {
+        $this->flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : array();
+        unset($_SESSION['flash']);
+    }
+
+    //メッセージセット
+    public function setFlash($msg)
+    {
+        $_SESSION['flash'] = $msg;
+        $this->flash = $_SESSION['flash'];
+    }
+
+    //ゲットメッセージ
+    public function getFlash()
+    {
+        return $this->flash;
     }
 }

@@ -2,11 +2,9 @@
 
 require "set.php";
 
-//セッション
-session_start();
 //フラッシュメッセージ初期化
-$flash = isset($_SESSION['flash']) ? $_SESSION['flash'] : array();
-unset($_SESSION['flash']);
+$flash = new Flash();
+$flash->reset();
 
 
 //POST送信(register)があった場合
@@ -78,7 +76,7 @@ if (!empty($_POST['regist'])) {
 
         $file->update($arr);
 
-        flashMessage('投稿しました');
+        $flash->setFlash('投稿しました');
         header('Location:' . $_SERVER['PHP_SELF']);
     }
 
@@ -110,11 +108,9 @@ if (!empty($_POST['regist'])) {
                 //POSTされた記事Noと削除キーがそれぞれ一致したらログファイルから該当のデータを削除
                 if ($no - 1 == $index && password_verify($pwd, $pwd_csv)) {
 
-                    // $file = new File();
-
                     $file->delete($no, $upfile);
 
-                    flashMessage('削除しました');
+                    $flash->setFlash('削除しました');
                     header('Location:' . $_SERVER['PHP_SELF']);
                 } else { //POSTされた記事Noと削除キーが不一致だった場合はエラーメッセージを表示
                     $err['delete'] = '該当記事が見つからないかパスワードが間違っています';
@@ -124,7 +120,9 @@ if (!empty($_POST['regist'])) {
     }
 }
 
-
+//ページ表示用にインスタンス化
+$file = new File();
+$page = new Pagination();
 ?>
 
 <!DOCTYPE html>
@@ -144,9 +142,9 @@ if (!empty($_POST['regist'])) {
 
 <body class="l-body">
     <div class="l-contents">
-        <?php if (!empty($flash)) { ?>
+        <?php if (!empty($flash->getFlash())) { ?>
             <div class="flashMessage js-flash">
-                <p class="flashMessage_text"><?php echo $flash; ?></p>
+                <p class="flashMessage_text"><?php echo $flash->getFlash(); ?></p>
             </div>
         <?php } ?>
         <div class="contents">
@@ -171,9 +169,7 @@ if (!empty($_POST['regist'])) {
                                 <th class="table_title">おなまえ</th>
                                 <td class="table_data" colspan="3">
                                     <input type="text" name="name" size="28" value="<?php if (!empty($err)) echo $name; ?>" class="input <?php if (!empty($err['name'])) echo 'active'; ?>">
-                                    <span class="errText"><?php if (!empty($err['name'])) {
-                                                                echo $err['name'];
-                                                            } ?></span>
+                                    <span class="errText"><?php if (!empty($err['name'])) { echo $err['name']; } ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -190,9 +186,7 @@ if (!empty($_POST['regist'])) {
                                 <th class="table_title">コメント</th>
                                 <td colspan="3" class="table_data">
                                     <textarea name="com" cols="50" rows="4" wrap="soft" class="textarea <?php if (!empty($err['com'])) echo 'active'; ?>"><?php if (!empty($err)) echo $com; ?></textarea>
-                                    <span class="errText"><?php if (!empty($err['com'])) {
-                                                                echo $err['com'];
-                                                            } ?></span>
+                                    <span class="errText"><?php if (!empty($err['com'])) { echo $err['com']; } ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -203,9 +197,7 @@ if (!empty($_POST['regist'])) {
                                 <th class="table_title">添付File</th>
                                 <td colspan="3" class="table_data">
                                     <input type="file" name="upfile" size="35">
-                                    <span class="errText"><?php if (!empty($err['upfile'])) {
-                                                                echo $err['upfile'];
-                                                            } ?></span>
+                                    <span class="errText"><?php if (!empty($err['upfile'])) { echo $err['upfile']; } ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -217,9 +209,7 @@ if (!empty($_POST['regist'])) {
                                             <p class="textBox_text textBox_text-sizeS">(記事の削除用。英数字で8文字以内)</p>
                                         </div>
                                     </div>
-                                    <span class="errText"><?php if (!empty($err['pwd'])) {
-                                                                echo $err['pwd'];
-                                                            } ?></span>
+                                    <span class="errText"><?php if (!empty($err['pwd'])) { echo $err['pwd']; } ?></span>
                                 </td>
                             </tr>
                         </tbody>
@@ -250,8 +240,7 @@ if (!empty($_POST['regist'])) {
                 </form>
             </div>
             <div class="block block-spaceL">
-                <?php $file = new File();
-                if (!empty($file->findAll())) {
+                <?php if (!empty($file->findAll())) {
                     foreach ($file->showData() as $index => $line) {
                         list($name, $email, $sub, $com, $url, $upfile, $pwd, $created_at) = explode(',', $line); ?>
                         <div class="block block-article">
@@ -300,15 +289,15 @@ if (!empty($_POST['regist'])) {
                 <?php if (!empty($file->findAll())) { ?>
                     <div class="pagination">
                         <div class="pagination_list">
-                            <?php if ($now == 1) { ?>
+                            <?php if ($page->now() == 1) { ?>
                                 <a class="pagination_list_item">&lt;</a>
                             <?php } else { ?>
-                                <a href="/?page=<?php echo $page - 1; ?>" class="pagination_list_item">&lt;</a>
+                                <a href="/?page=<?php echo $page->getPage() - 1; ?>" class="pagination_list_item">&lt;</a>
                             <?php } ?>
                         </div>
                         <ol class="pagination_list">
-                            <?php for ($i = 1; $i <= $max_page; $i++) {
-                                if ($i == $now) { ?>
+                            <?php for ($i = 1; $i <= $page->maxPage(); $i++) {
+                                if ($i == $page->now()) { ?>
                                     <li class="pagination_list_item"><a><?php echo $i; ?></a></li>
                                 <?php } else { ?>
                                     <li class="pagination_list_item"><a href="/?page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
@@ -316,10 +305,10 @@ if (!empty($_POST['regist'])) {
                             } ?>
                         </ol>
                         <div class="pagination_list">
-                            <?php if ($now == $max_page) { ?>
+                            <?php if ($page->now() == $page->maxPage()) { ?>
                                 <a class="pagination_list_item">&gt;</a>
                             <?php } else { ?>
-                                <a href="/?page=<?php echo $page + 1; ?>" class="pagination_list_item pagination_list_item-last">&gt;</a>
+                                <a href="/?page=<?php echo $page->getPage() + 1; ?>" class="pagination_list_item pagination_list_item-last">&gt;</a>
                             <?php } ?>
                         </div>
                     </div>
