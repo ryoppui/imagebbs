@@ -6,6 +6,8 @@ require "set.php";
 $flash = new Flash();
 $flash->reset();
 
+$vali = new Validation();
+
 
 //POST送信(register)があった場合
 if (!empty($_POST['regist'])) {
@@ -18,18 +20,19 @@ if (!empty($_POST['regist'])) {
     $upfile = $_FILES['upfile'];
     $pwd = $_POST['pwd'];
 
+    // $vali = new Validation();
 
     //バリデーションチェック
-    Validation::required($name, 'name', '名前が書きこまれていません');
-    Validation::required($com, 'com', '本文が書き込まれていません');
-    Validation::maxLength($com, 'com', '本文が長すぎますっ！');
-    Validation::imgType($upfile['size'], $upfile['tmp_name']);
-    Validation::halfNumber($pwd, 'pwd', '半角数字で入力してください');
-    Validation::required($pwd, 'pwd', '削除キーの入力がありません');
+    $vali->required($name, 'name', '名前が書きこまれていません');
+    $vali->required($com, 'com', '本文が書き込まれていません');
+    $vali->maxLength($com, 'com', '本文が長すぎますっ！');
+    $vali->imgType($upfile['size'], $upfile['tmp_name']);
+    $vali->halfNumber($pwd, 'pwd', '半角数字で入力してください');
+    $vali->required($pwd, 'pwd', '削除キーの入力がありません');
 
 
     //バリデーションチェックをクリアした場合
-    if (empty($err)) {
+    if (empty($vali->getErr())) {
 
         //タイトルが未入力の場合は「(無題)」にする
         if ($sub === '' || ctype_space($sub)) {
@@ -88,14 +91,14 @@ if (!empty($_POST['regist'])) {
     $pwd = $_POST['pwd'];
 
     //各バリデーションチェック
-    Validation::halfNumber($no, 'no', '記事Noは半角数字で入力してください');
-    Validation::required($no, 'no', '記事Noの入力がありません');
-    Validation::halfNumber($pwd, 'pwd-delete', '削除キーは半角数字で入力してください');
-    Validation::required($pwd, 'pwd-delete', '削除キーの入力がありません');
+    $vali->halfNumber($no, 'no', '記事Noは半角数字で入力してください');
+    $vali->required($no, 'no', '記事Noの入力がありません');
+    $vali->halfNumber($pwd, 'pwd-delete', '削除キーは半角数字で入力してください');
+    $vali->required($pwd, 'pwd-delete', '削除キーの入力がありません');
 
 
     //バリデーションチェックをクリアした場合
-    if (empty($err)) {
+    if (empty($vali->getErr())) {
 
         $file = new File();
 
@@ -113,7 +116,8 @@ if (!empty($_POST['regist'])) {
                     $flash->setFlash('削除しました');
                     header('Location:' . $_SERVER['PHP_SELF']);
                 } else { //POSTされた記事Noと削除キーが不一致だった場合はエラーメッセージを表示
-                    $err['delete'] = '該当記事が見つからないかパスワードが間違っています';
+                    // $err['delete'] = '該当記事が見つからないかパスワードが間違っています';
+                    $vali->setErr('delete', '該当記事が見つからないかパスワードが間違っています');
                 }
             }
         }
@@ -123,6 +127,7 @@ if (!empty($_POST['regist'])) {
 //ページ表示用にインスタンス化
 $file = new File();
 $page = new Pagination();
+// $vali = new Validation();
 ?>
 
 <!DOCTYPE html>
@@ -168,36 +173,36 @@ $page = new Pagination();
                             <tr>
                                 <th class="table_title">おなまえ</th>
                                 <td class="table_data" colspan="3">
-                                    <input type="text" name="name" size="28" value="<?php if (!empty($err)) echo $name; ?>" class="input <?php if (!empty($err['name'])) echo 'active'; ?>">
-                                    <span class="errText"><?php if (!empty($err['name'])) { echo $err['name']; } ?></span>
+                                    <input type="text" name="name" size="28" value="<?php if($vali->getErr()) echo $name; ?>" class="input <?php if ($vali->errShow('name')) echo 'active'; ?>">
+                                    <span class="errText"><?php echo $vali->errShow('name'); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th class="table_title">Eメール</th>
-                                <td class="table_data" colspan="3"><input type="email" name="email" size="28" value="<?php if (!empty($err)) echo $email; ?>" class="input"></td>
+                                <td class="table_data" colspan="3"><input type="email" name="email" size="28" value="<?php if ($vali->getErr()) echo $email; ?>" class="input"></td>
                             </tr>
                             <tr>
                                 <th class="table_title">題名</th>
-                                <td class="table_data"><input type="text" name="sub" size="35" value="<?php if (!empty($err)) echo $sub; ?>" class="input"></td>
+                                <td class="table_data"><input type="text" name="sub" size="35" value="<?php if ($vali->getErr()) echo $sub; ?>" class="input"></td>
                                 <td class="table_data"><input type="submit" name="register" value="送信する" class="btn"></td>
                                 <td class="table_data"><input type="reset" value="リセット" class="btn"></td>
                             </tr>
                             <tr>
                                 <th class="table_title">コメント</th>
                                 <td colspan="3" class="table_data">
-                                    <textarea name="com" cols="50" rows="4" wrap="soft" class="textarea <?php if (!empty($err['com'])) echo 'active'; ?>"><?php if (!empty($err)) echo $com; ?></textarea>
-                                    <span class="errText"><?php if (!empty($err['com'])) { echo $err['com']; } ?></span>
+                                    <textarea name="com" cols="50" rows="4" wrap="soft" class="textarea <?php if ($vali->errShow('com')) echo 'active'; ?>"><?php if ($vali->getErr()) echo $com; ?></textarea>
+                                    <span class="errText"><?php echo $vali->errShow('com'); ?></span>
                                 </td>
                             </tr>
                             <tr>
                                 <th class="table_title">U　R　L</th>
-                                <td colspan="3" class="table_data"><input type="url" name="url" size="63" value="http://<?php if (!empty($err)) echo str_replace('http://', '', $url); ?>" class="input"></td>
+                                <td colspan="3" class="table_data"><input type="url" name="url" size="63" value="http://<?php if ($vali->getErr()) echo str_replace('http://', '', $url); ?>" class="input"></td>
                             </tr>
                             <tr>
                                 <th class="table_title">添付File</th>
                                 <td colspan="3" class="table_data">
                                     <input type="file" name="upfile" size="35">
-                                    <span class="errText"><?php if (!empty($err['upfile'])) { echo $err['upfile']; } ?></span>
+                                    <span class="errText"><?php echo $vali->errShow('upfile'); ?></span>
                                 </td>
                             </tr>
                             <tr>
@@ -209,7 +214,7 @@ $page = new Pagination();
                                             <p class="textBox_text textBox_text-sizeS">(記事の削除用。英数字で8文字以内)</p>
                                         </div>
                                     </div>
-                                    <span class="errText"><?php if (!empty($err['pwd'])) { echo $err['pwd']; } ?></span>
+                                    <span class="errText"><?php echo $vali->errShow('pwd'); ?></span>
                                 </td>
                             </tr>
                         </tbody>
@@ -327,25 +332,25 @@ $page = new Pagination();
                                 <tr>
                                     <th class="table_title table_title-delete">記事No</th>
                                     <td class="table_data">
-                                        <input type="text" name="no" size="3" class="input input-delete <?php if (!empty($err['no'])) echo 'active'; ?>" value="<?php if (!empty($err)) echo $no; ?>">
+                                        <input type="text" name="no" size="3" class="input input-delete <?php if (!empty($err['no'])) echo 'active'; ?>" value="<?php if ($vali->getErr()) echo $no; ?>">
                                     </td>
                                     <th class="table_title table_title-delete">削除キー</th>
                                     <td class="table_data"><input type="password" name="pwd" size="8" maxlength="8" class="input input-delete <?php if (!empty($err['pwd-delete'])) echo 'active'; ?>"></td>
                                     <td class="table_data"><input type="submit" value="削除" name="delete" class="btn btn-delete"></td>
                                 </tr>
-                                <?php if (!empty($err['no'])) { ?>
+                                <?php if (!empty($vali->errShow('no'))) { ?>
                                     <tr>
-                                        <td colspan="5" class="table_data table_data-center"><span class="errText"><?php echo $err['no']; ?></span></td>
+                                        <td colspan="5" class="table_data table_data-center"><span class="errText"><?php echo $vali->errShow('no'); ?></span></td>
                                     </tr>
                                 <?php } ?>
-                                <?php if (!empty($err['pwd-delete'])) { ?>
+                                <?php if (!empty($vali->errShow('pwd-delete'))) { ?>
                                     <tr>
-                                        <td colspan="5" class="table_data table_data-center"><span class="errText"><?php echo $err['pwd-delete']; ?></span></td>
+                                        <td colspan="5" class="table_data table_data-center"><span class="errText"><?php echo $vali->errShow('pwd-delete'); ?></span></td>
                                     </tr>
                                 <?php } ?>
-                                <?php if (!empty($err['delete'])) { ?>
+                                <?php if (!empty($vali->errShow('delete'))) { ?>
                                     <tr>
-                                        <td colspan="5" class="table_data table_data-center"><span class="errText"><?php echo $err['delete']; ?></span></td>
+                                        <td colspan="5" class="table_data table_data-center"><span class="errText"><?php echo $vali->errShow('delete'); ?></span></td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

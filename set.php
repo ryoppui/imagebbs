@@ -17,8 +17,6 @@ $url = '';
 $upfile = '';
 $pwd = '';
 $pass = '';
-//エラーメッセージ
-$err = [];
 
 
 //関数
@@ -49,33 +47,31 @@ function imageCustom($upfile)
 //バリデーションクラス
 class Validation
 {
+    private $err = [];
 
     //入力チェック
-    public static function required($post, $errPoint, $errMessage)
+    public function required($post, $errPoint, $errMessage)
     {
-        global $err;
 
         if ($post === '' || ctype_space($post)) {
-            $err[$errPoint] = $errMessage;
+            $this->err[$errPoint] = $errMessage;
         }
     }
 
     //最大文字数チェック
-    public static function maxLength($post, $errPoint, $errMessage)
+    public function maxLength($post, $errPoint, $errMessage)
     {
 
-        global $err;
 
         if (mb_strlen($post) > 1000) {
-            $err[$errPoint] = $errMessage;
+            $this->err[$errPoint] = $errMessage;
         }
     }
 
     //画像チェック
-    public static function imgType($size, $tmp_name)
+    public function imgType($size, $tmp_name)
     {
 
-        global $err;
 
         if ($size !== 0) {
 
@@ -84,42 +80,58 @@ class Validation
                 exif_imagetype($tmp_name) !== IMAGETYPE_PNG && exif_imagetype($tmp_name) !== IMAGETYPE_JPEG &&
                 exif_imagetype($tmp_name) !== IMAGETYPE_GIF
             ) {
-                $err['upfile'] = '画像はGIF,JPG,PNGのいずれかにしてください';
+                $this->err['upfile'] = '画像はGIF,JPG,PNGのいずれかにしてください';
 
-                //サイズチェック
+            //サイズチェック
             } elseif ($size > 100000) {
-                $err['upfile'] = '画像サイズが100KBを超えています';
+                $this->err['upfile'] = '画像サイズが100KBを超えています';
             }
         }
     }
 
     //半角数字チェック
-    public static function halfNumber($post, $errPoint, $errMessage)
+    public function halfNumber($post, $errPoint, $errMessage)
     {
-        global $err;
 
         if (!preg_match("/^[0-9]+$/", $post)) {
-            $err[$errPoint] = $errMessage;
+            $this->err[$errPoint] = $errMessage;
         }
     }
 
     //パスワードチェック
-    public static function passCheck($pass, $errPoint)
+    public function passCheck($pass, $errPoint)
     {
-        global $err;
 
         if ($pass !== ADMIN_PASS) {
-            $err[$errPoint] = 'パスワードが違います';
+            $this->err[$errPoint] = 'パスワードが違います';
         }
     }
 
     //管理者削除チェック
-    public static function radioCheck($post, $errPoint)
+    public function radioCheck($post, $errPoint)
     {
-        global $err;
 
         if (!isset($post)) {
-            $err[$errPoint] = '削除する記事を選択してください';
+            $this->err[$errPoint] = '削除する記事を選択してください';
+        }
+    }
+
+    // エラーセット
+    public function setErr($errPoint, $errMessage)
+    {
+        $this->err[$errPoint] = $errMessage;
+    }
+
+    //エラーゲッター
+    public function getErr() {
+        return $this->err;
+    }
+
+    // エラーメッセージ表示
+    public function errShow($errPoint)
+    {
+        if(!empty($this->err[$errPoint])) {
+            return $this->err[$errPoint];
         }
     }
 }

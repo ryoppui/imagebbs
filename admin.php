@@ -6,6 +6,7 @@ require "set.php";
 $flash = new Flash();
 $flash->reset();
 
+$vali = new Validation();
 
 //POST送信(login)があった場合
 if (!empty($_POST['login'])) {
@@ -13,11 +14,11 @@ if (!empty($_POST['login'])) {
     $pass = $_POST['pass'];
 
     //バリデーション
-    Validation::passCheck($pass, 'pass');
-    Validation::halfNumber($pass, 'pass', '半角数字で入力してください');
-    Validation::required($pass, 'pass', 'パスワードが入力されていません');
+    $vali->passCheck($pass, 'pass');
+    $vali->halfNumber($pass, 'pass', '半角数字で入力してください');
+    $vali->required($pass, 'pass', 'パスワードが入力されていません');
 
-    if (empty($err)) {
+    if (empty($vali->getErr())) {
         $_SESSION['admin'] = true;
     }
 }
@@ -31,7 +32,7 @@ if (!empty($_POST['admin']) && $_POST['logout']) {
 } elseif (!empty($_POST['admin']) && $_POST['delete']) {
     $delete_no = $_POST['delete_radio'];
 
-    Validation::radioCheck($delete_no, 'delete');
+    $vali->radioCheck($delete_no, 'delete');
 
     if (isset($delete_no)) {
 
@@ -102,8 +103,8 @@ $page = new Pagination();
                         <div class="title title-borderNone">
                             <h2 class="title_text title_text-sizeL">管理者モード</h2>
                         </div>
-                        <?php if (!empty($err['delete'])) { ?>
-                            <span class="errText"><?php echo $err['delete']; ?></span>
+                        <?php if (!empty($vali->errShow('delete'))) { ?>
+                            <span class="errText"><?php echo $vali->errShow('delete'); ?></span>
                         <?php } ?>
                         <?php if (!empty($file->findAll())) {
                             foreach ($file->showData() as $index => $line) {
@@ -210,8 +211,8 @@ $page = new Pagination();
                     <form action="#" method="post" class="form form-login">
                         <input type="hidden" name="login" value="login">
                         <input type="password" class="input input-width100" name="pass" maxlength="8" placeholder="パスワード">
-                        <?php if (!empty($err['pass'])) { ?>
-                            <span class="errText"><?php echo $err['pass']; ?></span>
+                        <?php if (!empty($vali->errShow('pass'))) { ?>
+                            <span class="errText"><?php echo $vali->errShow('pass'); ?></span>
                         <?php } ?>
                         <input type="submit" class="btn btn-spaceS">
                     </form>
